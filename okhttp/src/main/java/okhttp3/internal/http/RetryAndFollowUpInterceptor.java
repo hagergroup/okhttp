@@ -39,6 +39,7 @@ import okhttp3.internal.connection.Transmitter;
 import okhttp3.internal.http2.ConnectionShutdownException;
 
 import static java.net.HttpURLConnection.HTTP_CLIENT_TIMEOUT;
+import static java.net.HttpURLConnection.HTTP_FORBIDDEN;
 import static java.net.HttpURLConnection.HTTP_MOVED_PERM;
 import static java.net.HttpURLConnection.HTTP_MOVED_TEMP;
 import static java.net.HttpURLConnection.HTTP_MULT_CHOICE;
@@ -228,6 +229,14 @@ public final class RetryAndFollowUpInterceptor implements Interceptor {
 
       case HTTP_UNAUTHORIZED:
         return client.authenticator().authenticate(route, userResponse);
+
+      case HTTP_FORBIDDEN:
+        if(!client.handleForbiddenAsUnauthorized()) {
+          return null;
+        }
+        else {
+          return client.authenticator().authenticate(route, userResponse);
+        }
 
       case HTTP_PERM_REDIRECT:
       case HTTP_TEMP_REDIRECT:

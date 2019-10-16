@@ -189,6 +189,7 @@ public class OkHttpClient implements Cloneable, Call.Factory, WebSocket.Factory 
   final Authenticator authenticator;
   final ConnectionPool connectionPool;
   final Dns dns;
+  boolean handleForbiddenAsUnauthorized = false;
   final boolean followSslRedirects;
   final boolean followRedirects;
   final boolean retryOnConnectionFailure;
@@ -243,6 +244,7 @@ public class OkHttpClient implements Cloneable, Call.Factory, WebSocket.Factory 
     this.dns = builder.dns;
     this.followSslRedirects = builder.followSslRedirects;
     this.followRedirects = builder.followRedirects;
+    this.handleForbiddenAsUnauthorized = builder.handleForbiddenAsUnauthorized;
     this.retryOnConnectionFailure = builder.retryOnConnectionFailure;
     this.callTimeout = builder.callTimeout;
     this.connectTimeout = builder.connectTimeout;
@@ -356,6 +358,10 @@ public class OkHttpClient implements Cloneable, Call.Factory, WebSocket.Factory 
     return followRedirects;
   }
 
+  public boolean handleForbiddenAsUnauthorized() {
+    return handleForbiddenAsUnauthorized;
+  }
+
   public boolean retryOnConnectionFailure() {
     return retryOnConnectionFailure;
   }
@@ -437,6 +443,7 @@ public class OkHttpClient implements Cloneable, Call.Factory, WebSocket.Factory 
     Dns dns;
     boolean followSslRedirects;
     boolean followRedirects;
+    boolean handleForbiddenAsUnauthorized;
     boolean retryOnConnectionFailure;
     int callTimeout;
     int connectTimeout;
@@ -855,6 +862,11 @@ public class OkHttpClient implements Cloneable, Call.Factory, WebSocket.Factory 
     /** Configure this client to follow redirects. If unset, redirects will be followed. */
     public Builder followRedirects(boolean followRedirects) {
       this.followRedirects = followRedirects;
+      return this;
+    }
+
+    public Builder handleForbiddenAsUnauthorized(boolean handleForbiddenAsUnauthorized) {
+      this.handleForbiddenAsUnauthorized = handleForbiddenAsUnauthorized;
       return this;
     }
 
