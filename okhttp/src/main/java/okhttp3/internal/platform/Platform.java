@@ -110,7 +110,7 @@ public class Platform {
    * @param hostname non-null for client-side handshakes; null for server-side handshakes.
    */
   public void configureTlsExtensions(SSLSocket sslSocket, @Nullable String hostname,
-      List<Protocol> protocols) {
+      List<Protocol> protocols) throws IOException {
   }
 
   /**
@@ -199,12 +199,20 @@ public class Platform {
 
   /** Attempt to match the host runtime to a capable Platform implementation. */
   private static Platform findPlatform() {
-    Platform android = AndroidPlatform.buildIfSupported();
-
-    if (android != null) {
-      return android;
+    if (isAndroid()) {
+      return findAndroidPlatform();
+    } else {
+      return findJvmPlatform();
     }
+  }
 
+  public static boolean isAndroid() {
+    // This explicit check avoids activating in Android Studio with Android specific classes
+    // available when running plugins inside the IDE.
+    return "Dalvik".equals(System.getProperty("java.vm.name"));
+  }
+
+  private static Platform findJvmPlatform() {
     if (isConscryptPreferred()) {
       Platform conscrypt = ConscryptPlatform.buildIfSupported();
 
@@ -227,6 +235,22 @@ public class Platform {
 
     // Probably an Oracle JDK like OpenJDK.
     return new Platform();
+  }
+
+  private static Platform findAndroidPlatform() {
+    Platform android10 = Android10Platform.buildIfSupported();
+
+    if (android10 != null) {
+      return android10;
+    }
+
+    Platform android = AndroidPlatform.buildIfSupported();
+
+    if (android == null) {
+      throw new NullPointerException("No platform found on Android");
+    }
+
+    return android;
   }
 
   /**
